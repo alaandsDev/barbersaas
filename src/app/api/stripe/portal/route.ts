@@ -3,6 +3,9 @@ import { stripe } from "@/lib/stripe";
 import { requireTenant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export async function POST() {
   const ctx = await requireTenant();
   const sub = await prisma.subscription.findUnique({ where: { businessId: ctx.businessId } });
