@@ -11,15 +11,30 @@ const schema = z.object({
   phone: z.string().optional(),
 });
 
+function slugify(input: string) {
+  return input
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+}
+
 export async function createBusinessAction(formData: FormData) {
   const user = await requireUser();
   await ensureLocalUser(user);
 
   const parsed = schema.parse({
     name: formData.get("name"),
-    slug: formData.get("slug"),
+    slug: slugify(String(formData.get("slug") ?? "")),
     phone: formData.get("phone") || undefined,
   });
+
+  const existing = await prisma.business.findUnique({ where: { slug: parsed.slug } });
+  if (existing) {
+    throw new Error(`O slug "${parsed.slug}" já está em uso. Tente outro.`);
+  }
 
   const business = await prisma.business.create({
     data: {

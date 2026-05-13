@@ -11,6 +11,10 @@ export default async function BillingRequiredPage() {
       <h1 className="text-3xl font-bold">Escolha seu plano para ativar o BarberOS</h1>
       <p className="mt-2 text-slate-600">Você pode trocar ou cancelar a qualquer momento.</p>
 
+      <div className="mt-6 inline-block rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200">
+        🎁 3 dias grátis em qualquer plano — sem cartão de crédito
+      </div>
+
       <div className="mt-10 grid gap-6 md:grid-cols-3">
         {order.map((key) => {
           const p = PLANS[key];

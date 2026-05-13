@@ -55,7 +55,7 @@ export default function Home() {
         >
           👉 Começar grátis
         </Link>
-        <p className="mt-4 text-xs text-slate-500">Sem cartão de crédito • Cancele quando quiser</p>
+        <p className="mt-4 text-xs text-slate-500">3 dias grátis • Sem cartão de crédito • Cancele quando quiser</p>
       </section>
 
       {/* PROBLEMA */}

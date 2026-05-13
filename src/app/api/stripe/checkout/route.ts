@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     });
   }
 
+  // Trial de 3 dias gratis em qualquer plano. Sem cartao no checkout — Stripe cancela se nao adicionar PM ate o fim.
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
@@ -39,7 +40,12 @@ export async function POST(req: Request) {
     success_url: `${appUrl}/app?checkout=success`,
     cancel_url: `${appUrl}/billing/required?canceled=1`,
     allow_promotion_codes: true,
-    subscription_data: { metadata: { businessId: ctx.businessId } },
+    payment_method_collection: "if_required",
+    subscription_data: {
+      metadata: { businessId: ctx.businessId },
+      trial_period_days: 3,
+      trial_settings: { end_behavior: { missing_payment_method: "cancel" } },
+    },
     metadata: { businessId: ctx.businessId, plan },
   });
 
