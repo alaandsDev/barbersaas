@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
-import { Scissors, Clock, Calendar as CalIcon } from "lucide-react";
+import { Scissors } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { formatBRL } from "@/lib/utils";
 import { BookingFlow } from "./booking-flow";
 
 export const dynamic = "force-dynamic";
@@ -63,18 +62,3 @@ export default async function PublicBookingPage({ params }: { params: { slug: st
   );
 }
 
-// helpers usados no preview da lista
-export function ServicePreview({ name, priceCents, durationMinutes }: { name: string; priceCents: number; durationMinutes: number }) {
-  return (
-    <div className="flex items-center justify-between rounded-lg border p-3">
-      <div>
-        <div className="font-medium">{name}</div>
-        <div className="mt-1 flex items-center gap-1 text-xs text-slate-500"><Clock className="h-3 w-3" /> {durationMinutes} min</div>
-      </div>
-      <div className="text-sm font-semibold">{formatBRL(priceCents)}</div>
-    </div>
-  );
-}
-
-// suprime warning de export não usado quando alguém importá-lo
-export const _icons = { CalIcon };
