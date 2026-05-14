@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { NotificationBell } from "./notification-bell";
 
 const TITLES: Record<string, string> = {
   "/app": "Dashboard",
@@ -12,6 +13,7 @@ const TITLES: Record<string, string> = {
   "/app/servicos": "Serviços",
   "/app/financeiro": "Financeiro",
   "/app/indicacoes": "Indique e ganhe",
+  "/app/settings": "Configurações",
   "/app/billing": "Plano & Cobrança",
 };
 
@@ -40,6 +42,7 @@ export function Topbar({ userEmail, userInitial }: { userEmail: string; userInit
           <span>Buscar</span>
           <kbd className="ml-2 rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px]">{mac ? "⌘" : "Ctrl"} K</kbd>
         </button>
+        <NotificationBell />
         <div className="hidden text-right sm:block">
           <div className="text-sm font-medium leading-none">{userEmail}</div>
           <div className="mt-1 text-xs text-muted-foreground">Owner</div>

@@ -1,7 +1,8 @@
-import { Trash2, CheckCircle2, XCircle, CalendarDays } from "lucide-react";
+import Link from "next/link";
+import { Trash2, CheckCircle2, XCircle, CalendarDays, List, LayoutGrid } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { EmptyState } from "@/components/ui/empty-state";
 import { NewAppointmentForm } from "./new-appointment-form";
 import { setAppointmentStatus, deleteAppointment } from "./actions";
+import { WeekShell } from "./week-shell";
 
 const STATUS: Record<string, { label: string; variant: "info" | "success" | "warning" | "destructive" | "default" }> = {
   SCHEDULED: { label: "Agendado", variant: "info" },
@@ -18,33 +20,96 @@ const STATUS: Record<string, { label: string; variant: "info" | "success" | "war
   NO_SHOW: { label: "Não compareceu", variant: "destructive" },
 };
 
-export default async function AgendaPage({ searchParams }: { searchParams: { date?: string } }) {
-  const { ctx } = await requireActiveSubscription();
-  const day = searchParams.date ? new Date(searchParams.date) : new Date();
-  day.setHours(0, 0, 0, 0);
-  const next = new Date(day); next.setDate(next.getDate() + 1);
-  const todayISO = day.toISOString().slice(0, 10);
+function startOfWeek(d: Date) {
+  const out = new Date(d); out.setHours(0, 0, 0, 0);
+  const day = (out.getDay() + 6) % 7;
+  out.setDate(out.getDate() - day);
+  return out;
+}
 
-  const [appointments, professionals, services, customers] = await Promise.all([
-    prisma.appointment.findMany({
-      where: { businessId: ctx.businessId, startsAt: { gte: day, lt: next } },
-      include: { customer: true, professional: true, service: true },
-      orderBy: { startsAt: "asc" },
-    }),
+export default async function AgendaPage({ searchParams }: { searchParams: { date?: string; view?: string; week?: string } }) {
+  const { ctx } = await requireActiveSubscription();
+  const view = (searchParams.view ?? "list") === "week" ? "week" : "list";
+
+  const [professionals, services, customers] = await Promise.all([
     prisma.professional.findMany({ where: { businessId: ctx.businessId, active: true }, orderBy: { name: "asc" } }),
     prisma.service.findMany({ where: { businessId: ctx.businessId, active: true }, orderBy: { name: "asc" } }),
     prisma.customer.findMany({ where: { businessId: ctx.businessId }, orderBy: { name: "asc" }, take: 500 }),
   ]);
 
+  const switcher = (
+    <div className="flex gap-1 rounded-lg border bg-white p-1">
+      <Link href="/app/agenda?view=list" className={cn("inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium", view === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+        <List className="h-3.5 w-3.5" /> Lista
+      </Link>
+      <Link href="/app/agenda?view=week" className={cn("inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium", view === "week" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+        <LayoutGrid className="h-3.5 w-3.5" /> Semana
+      </Link>
+    </div>
+  );
+
+  if (view === "week") {
+    const weekStart = searchParams.week ? new Date(searchParams.week) : startOfWeek(new Date());
+    if (Number.isNaN(weekStart.getTime())) weekStart.setTime(startOfWeek(new Date()).getTime());
+    const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 7);
+
+    const appointments = await prisma.appointment.findMany({
+      where: { businessId: ctx.businessId, startsAt: { gte: weekStart, lt: weekEnd } },
+      include: { customer: true, professional: true, service: true },
+      orderBy: { startsAt: "asc" },
+    });
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-end justify-between">
+          <h1 className="text-3xl font-bold">Agenda</h1>
+          {switcher}
+        </div>
+
+        <NewAppointmentForm professionals={professionals} services={services} customers={customers} />
+
+        <WeekShell
+          weekStartISO={weekStart.toISOString().slice(0, 10)}
+          appointments={appointments.map((a) => ({
+            id: a.id,
+            startsAt: a.startsAt.toISOString(),
+            endsAt: a.endsAt.toISOString(),
+            status: a.status,
+            customerName: a.customer.name,
+            serviceName: a.service.name,
+            professionalName: a.professional.name,
+            priceCents: a.priceCents,
+          }))}
+        />
+      </div>
+    );
+  }
+
+  // LIST VIEW (existente)
+  const day = searchParams.date ? new Date(searchParams.date) : new Date();
+  day.setHours(0, 0, 0, 0);
+  const next = new Date(day); next.setDate(next.getDate() + 1);
+  const todayISO = day.toISOString().slice(0, 10);
+
+  const appointments = await prisma.appointment.findMany({
+    where: { businessId: ctx.businessId, startsAt: { gte: day, lt: next } },
+    include: { customer: true, professional: true, service: true },
+    orderBy: { startsAt: "asc" },
+  });
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex items-end justify-between">
         <h1 className="text-3xl font-bold">Agenda</h1>
-        <form className="flex items-center gap-2">
-          <label className="text-sm text-muted-foreground">Data:</label>
-          <Input type="date" name="date" defaultValue={todayISO} className="w-auto" />
-          <Button variant="outline" type="submit">Ver</Button>
-        </form>
+        <div className="flex items-center gap-3">
+          <form className="flex items-center gap-2">
+            <input type="hidden" name="view" value="list" />
+            <label className="text-sm text-muted-foreground">Data:</label>
+            <Input type="date" name="date" defaultValue={todayISO} className="w-auto" />
+            <Button variant="outline" type="submit" size="sm">Ver</Button>
+          </form>
+          {switcher}
+        </div>
       </div>
 
       <NewAppointmentForm professionals={professionals} services={services} customers={customers} />

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireTenant } from "@/lib/auth";
+import { createNotification } from "@/lib/notifications";
 
 const createSchema = z.object({
   professionalId: z.string().min(1),
@@ -61,6 +62,13 @@ export async function createAppointment(formData: FormData): Promise<ActionResul
       priceCents: service.priceCents,
       notes: p.notes,
     },
+  });
+  await createNotification({
+    businessId: ctx.businessId,
+    kind: "appointment.created",
+    title: "Novo agendamento",
+    body: `${customer.name} · ${service.name} com ${professional.name} em ${startsAt.toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`,
+    link: "/app/agenda",
   });
   revalidatePath("/app/agenda");
   revalidatePath("/app");

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Scissors } from "lucide-react";
+import { Scissors, Phone } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { BookingFlow } from "./booking-flow";
 
@@ -18,35 +18,62 @@ export default async function PublicBookingPage({ params }: { params: { slug: st
 
   const sub = business.subscription;
   const subOk = sub && (sub.status === "ACTIVE" || sub.status === "TRIALING");
+  const brand = business.brandColor ?? "#0f172a";
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center gap-3 px-6 py-4">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <Scissors className="h-4 w-4" />
-          </div>
-          <div>
-            <div className="text-base font-bold leading-none">{business.name}</div>
-            <div className="mt-1 text-xs text-slate-500">Agende online em segundos</div>
+      {/* COVER */}
+      <div
+        className="relative h-44 w-full"
+        style={{ background: `linear-gradient(135deg, ${brand} 0%, ${shade(brand, -25)} 100%)` }}
+      >
+        <div className="absolute inset-0 [background:radial-gradient(circle_at_top_right,rgba(255,255,255,.18),transparent_60%)]" />
+        {business.coverEmoji && (
+          <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-30">{business.coverEmoji}</div>
+        )}
+      </div>
+
+      <div className="mx-auto -mt-12 max-w-2xl px-6">
+        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div
+              className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-white shadow-sm"
+              style={{ background: brand }}
+            >
+              {business.coverEmoji ? (
+                <span className="text-2xl">{business.coverEmoji}</span>
+              ) : (
+                <Scissors className="h-6 w-6" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="truncate text-xl font-bold">{business.name}</h1>
+              {business.bio && <p className="mt-1 text-sm text-slate-600">{business.bio}</p>}
+              {business.phone && (
+                <div className="mt-2 flex items-center gap-1 text-xs text-slate-500">
+                  <Phone className="h-3 w-3" /> {business.phone}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="mx-auto max-w-2xl px-6 py-10">
+      <main className="mx-auto max-w-2xl px-6 py-8">
         {!subOk ? (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
-            <h1 className="text-lg font-semibold">Agenda temporariamente indisponível</h1>
+            <h2 className="text-lg font-semibold">Agenda temporariamente indisponível</h2>
             <p className="mt-2 text-sm">Volte mais tarde ou entre em contato com a barbearia.</p>
           </div>
         ) : business.services.length === 0 || business.professionals.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h1 className="text-lg font-semibold">Agenda em configuração</h1>
+            <h2 className="text-lg font-semibold">Agenda em configuração</h2>
             <p className="mt-2 text-sm text-slate-600">A barbearia ainda está cadastrando serviços e profissionais. Volte em breve.</p>
           </div>
         ) : (
           <BookingFlow
             businessId={business.id}
+            brandColor={brand}
             services={business.services.map((s) => ({
               id: s.id, name: s.name, priceCents: s.priceCents, durationMinutes: s.durationMinutes,
             }))}
@@ -62,3 +89,14 @@ export default async function PublicBookingPage({ params }: { params: { slug: st
   );
 }
 
+// shade simples: positive lighten, negative darken (em %)
+function shade(hex: string, percent: number) {
+  const f = parseInt(hex.replace("#", ""), 16);
+  const t = percent < 0 ? 0 : 255;
+  const p = Math.abs(percent) / 100;
+  const R = f >> 16, G = (f >> 8) & 0x00ff, B = f & 0x0000ff;
+  const r = Math.round((t - R) * p) + R;
+  const g = Math.round((t - G) * p) + G;
+  const b = Math.round((t - B) * p) + B;
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}

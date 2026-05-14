@@ -13,7 +13,7 @@ import { getAvailableSlots, bookPublicAppointment, type SlotInfo } from "./actio
 type Service = { id: string; name: string; priceCents: number; durationMinutes: number };
 type Pro = { id: string; name: string };
 
-export function BookingFlow({ businessId, services, professionals }: { businessId: string; services: Service[]; professionals: Pro[] }) {
+export function BookingFlow({ businessId, services, professionals, brandColor = "#0f172a" }: { businessId: string; services: Service[]; professionals: Pro[]; brandColor?: string }) {
   const [step, setStep] = useState<1 | 2 | 3 | 4 | "done">(1);
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [professionalId, setProfessionalId] = useState<string | null>(null);
@@ -73,7 +73,7 @@ export function BookingFlow({ businessId, services, professionals }: { businessI
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ ["--brand" as any]: brandColor }}>
       <Steps current={step as 1 | 2 | 3 | 4} />
 
       {step === 1 && (
@@ -152,7 +152,7 @@ export function BookingFlow({ businessId, services, professionals }: { businessI
                     className={cn(
                       "rounded-md border px-3 py-2 text-sm font-medium transition-all",
                       s.available
-                        ? "hover:border-primary hover:bg-primary hover:text-primary-foreground"
+                        ? "hover:border-[var(--brand)] hover:bg-[var(--brand)] hover:text-white"
                         : "cursor-not-allowed bg-muted text-muted-foreground line-through"
                     )}
                   >
@@ -190,7 +190,10 @@ export function BookingFlow({ businessId, services, professionals }: { businessI
               <Label htmlFor="email">Email (opcional)</Label>
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
-            <Button type="submit" variant="accent" disabled={pending} className="w-full">
+            <Button
+              type="submit" disabled={pending} className="w-full text-white"
+              style={{ background: "var(--brand)" }}
+            >
               {pending ? "Confirmando..." : <>Confirmar agendamento <Check className="h-4 w-4" /></>}
             </Button>
           </form>

@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendBookingConfirmation } from "@/lib/email";
+import { createNotification } from "@/lib/notifications";
 
 // Janela de funcionamento padrão (a evoluir pra config por barbearia)
 const OPEN_HOUR = 9;
@@ -128,6 +129,15 @@ export async function bookPublicAppointment(input: z.infer<typeof bookSchema>): 
       startsAt, endsAt,
       priceCents: service.priceCents,
     },
+  });
+
+  // notificação in-app pro owner
+  await createNotification({
+    businessId: p.businessId,
+    kind: "appointment.created",
+    title: "Novo agendamento",
+    body: `${customer.name} agendou ${service.name} com ${professional.name} em ${startsAt.toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`,
+    link: "/app/agenda",
   });
 
   // confirmação por email (no-op se RESEND_API_KEY não setado)
