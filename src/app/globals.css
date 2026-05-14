@@ -11,7 +11,6 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Brand: deep indigo + amber accent */
     --primary: 230 60% 14%;
     --primary-foreground: 210 40% 98%;
     --accent: 38 95% 53%;
@@ -28,9 +27,8 @@
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 230 60% 14%;
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
-    /* App surface tones */
     --sidebar: 230 50% 11%;
     --sidebar-foreground: 220 14% 88%;
     --sidebar-muted: 220 9% 60%;
@@ -41,12 +39,55 @@
 @layer base {
   * { @apply border-border; }
   body {
-    @apply bg-[hsl(220,30%,98%)] text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    @apply text-foreground antialiased;
+    background:
+      radial-gradient(at 0% 0%, hsl(230 60% 96%) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsl(38 95% 95%) 0px, transparent 50%),
+      hsl(220 30% 99%);
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "cv11" 1;
   }
   html, body { height: 100%; }
-  h1, h2, h3, h4 { letter-spacing: -0.02em; }
+  h1, h2, h3, h4 { letter-spacing: -0.022em; }
+  h1 { letter-spacing: -0.035em; }
+  ::selection { background: hsl(38 95% 80%); color: hsl(26 80% 14%); }
 }
 
-/* utility: subtle elevated card */
-.card-elevated { box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.04); }
+/* utilities */
+.card-elevated { box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px -6px rgba(15,23,42,.06); }
+.card-floating { box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 24px 48px -12px rgba(15,23,42,.18); }
+.text-balance { text-wrap: balance; }
+
+/* gradient text */
+.text-gradient {
+  background: linear-gradient(180deg, hsl(230 60% 14%) 0%, hsl(230 30% 35%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* hero glow */
+.glow-accent::before {
+  content: "";
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 600px;
+  background:
+    radial-gradient(ellipse at 30% 30%, hsl(38 95% 70% / .35), transparent 60%),
+    radial-gradient(ellipse at 70% 50%, hsl(230 90% 75% / .35), transparent 60%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* grid background pattern */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, hsl(220 13% 91% / .5) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(220 13% 91% / .5) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, #000 30%, transparent 70%);
+}
+
+/* shimmer for skeleton */
+@keyframes shimmer { 0% { background-position: -800px 0; } 100% { background-position: 800px 0; } }
+.shimmer { animation: shimmer 1.5s infinite linear; background: linear-gradient(90deg, hsl(220 14% 94%) 0%, hsl(220 14% 96%) 50%, hsl(220 14% 94%) 100%); background-size: 1600px 100%; }
