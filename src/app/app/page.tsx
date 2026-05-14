@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Sparkline } from "@/components/ui/sparkline";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PublicLinkBanner } from "./public-link-banner";
 
 export default async function DashboardPage() {
   const { ctx } = await requireActiveSubscription();
@@ -15,6 +16,10 @@ export default async function DashboardPage() {
   const start = new Date(now); start.setHours(0, 0, 0, 0);
   const tomorrow = new Date(start); tomorrow.setDate(tomorrow.getDate() + 1);
   const sevenDaysAgo = new Date(start); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+
+  const business = await prisma.business.findUnique({ where: { id: ctx.businessId }, select: { slug: true } });
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const publicUrl = `${appUrl}/b/${business?.slug ?? ""}`;
 
   const [todays, upcoming, weekCompleted, totalCustomers, weeklyAggs] = await Promise.all([
     prisma.appointment.findMany({
@@ -79,6 +84,8 @@ export default async function DashboardPage() {
           Resumo de {now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
         </p>
       </div>
+
+      <PublicLinkBanner url={publicUrl} />
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-3">

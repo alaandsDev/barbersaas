@@ -19,7 +19,7 @@ export function Sidebar({ businessName, plan, status }: { businessName: string; 
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-[260px] flex-col bg-sidebar text-sidebar-foreground">
+    <aside className="sticky top-0 flex h-screen w-[260px] shrink-0 flex-col self-start bg-sidebar text-sidebar-foreground">
       <div className="flex items-center gap-2 px-5 py-5">
         <div className="grid h-9 w-9 place-items-center rounded-lg bg-accent text-accent-foreground">
           <Scissors className="h-4 w-4" />

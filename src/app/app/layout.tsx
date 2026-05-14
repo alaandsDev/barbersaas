@@ -18,15 +18,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const initial = (user.email ?? "?").charAt(0).toUpperCase();
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar
         businessName={business?.name ?? ""}
         plan={business?.subscription?.plan ?? "—"}
         status={business?.subscription?.status ?? "INACTIVE"}
       />
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar userEmail={user.email ?? ""} userInitial={initial} />
-        <main className="flex-1 overflow-auto p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto p-8">{children}</main>
       </div>
     </div>
   );
