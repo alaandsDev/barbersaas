@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { sendBookingConfirmation } from "@/lib/email";
 
 // Janela de funcionamento padrão (a evoluir pra config por barbearia)
 const OPEN_HOUR = 9;
@@ -128,6 +129,19 @@ export async function bookPublicAppointment(input: z.infer<typeof bookSchema>): 
       priceCents: service.priceCents,
     },
   });
+
+  // confirmação por email (no-op se RESEND_API_KEY não setado)
+  if (customer.email) {
+    sendBookingConfirmation({
+      to: customer.email,
+      customerName: customer.name,
+      businessName: business.name,
+      service: service.name,
+      professional: professional.name,
+      when: startsAt,
+      priceCents: service.priceCents,
+    }).catch(() => {});
+  }
 
   return { ok: true, appointmentId: appt.id };
 }

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser, ensureLocalUser } from "@/lib/auth";
+import { sendWelcomeEmail } from "@/lib/email";
 
 const schema = z.object({
   name: z.string().min(2).max(80),
@@ -45,6 +46,14 @@ export async function createBusinessAction(formData: FormData) {
       subscription: { create: { status: "INACTIVE", plan: "BASIC" } },
     },
   });
+
+  if (user.email) {
+    sendWelcomeEmail({
+      to: user.email,
+      name: (user.user_metadata as any)?.name ?? null,
+      businessName: business.name,
+    }).catch(() => {});
+  }
 
   redirect(`/billing/required?business=${business.id}`);
 }

@@ -3,6 +3,7 @@ import { requireUser, ensureLocalUser, getTenantContext } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
+import { CommandPalette } from "./command-palette";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
@@ -28,6 +29,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <Topbar userEmail={user.email ?? ""} userInitial={initial} />
         <main className="flex-1 overflow-y-auto p-8">{children}</main>
       </div>
+      <CommandPalette />
     </div>
   );
 }

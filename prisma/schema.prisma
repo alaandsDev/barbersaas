@@ -179,6 +179,7 @@ model Appointment {
   status         AppointmentStatus @default(SCHEDULED)
   priceCents     Int
   notes          String?
+  reminderSentAt DateTime?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
@@ -189,4 +190,5 @@ model Appointment {
 
   @@index([businessId, startsAt])
   @@index([professionalId, startsAt])
+  @@index([startsAt, reminderSentAt])
 }
