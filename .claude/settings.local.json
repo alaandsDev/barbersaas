@@ -10,7 +10,8 @@
       "PowerShell(\"---\")",
       "PowerShell(if \\(Test-Path .env.local\\) { \"ok: .env.local existe \\($\\(\\(Get-Item .env.local\\).Length\\) bytes\\)\" } else { \"ERRO: .env.local nao encontrado\" })",
       "Read(//c/Users/aland/AppData/Local/Temp/claude/C--Users-aland-Desktop-projects-barbersaas/dc0f1f3b-c36d-4fb2-be0d-f3561b32017a/tasks/**)",
-      "Bash(wait)"
+      "Bash(wait)",
+      "PowerShell($env:GIT_TERMINAL_PROMPT=\"0\"; git push origin main 2>&1)"
     ]
   }
 }
