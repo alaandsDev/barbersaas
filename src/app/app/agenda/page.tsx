@@ -1,15 +1,21 @@
-import { Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { Trash2, CheckCircle2, XCircle, CalendarDays } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/empty-state";
 import { NewAppointmentForm } from "./new-appointment-form";
 import { setAppointmentStatus, deleteAppointment } from "./actions";
 
-const STATUS_LABEL: Record<string, string> = {
-  SCHEDULED: "Agendado", COMPLETED: "Concluído", CANCELED: "Cancelado", NO_SHOW: "Não compareceu",
+const STATUS: Record<string, { label: string; variant: "info" | "success" | "warning" | "destructive" | "default" }> = {
+  SCHEDULED: { label: "Agendado", variant: "info" },
+  COMPLETED: { label: "Concluído", variant: "success" },
+  CANCELED: { label: "Cancelado", variant: "warning" },
+  NO_SHOW: { label: "Não compareceu", variant: "destructive" },
 };
 
 export default async function AgendaPage({ searchParams }: { searchParams: { date?: string } }) {
@@ -43,59 +49,68 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
 
       <NewAppointmentForm professionals={professionals} services={services} customers={customers} />
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Hora</TableHead>
-            <TableHead>Cliente</TableHead>
-            <TableHead>Serviço</TableHead>
-            <TableHead>Profissional</TableHead>
-            <TableHead>Valor</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {appointments.map((a) => (
-            <TableRow key={a.id}>
-              <TableCell>
-                {a.startsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}–
-                {a.endsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-              </TableCell>
-              <TableCell>{a.customer.name}</TableCell>
-              <TableCell>{a.service.name}</TableCell>
-              <TableCell>{a.professional.name}</TableCell>
-              <TableCell>{formatBRL(a.priceCents)}</TableCell>
-              <TableCell>{STATUS_LABEL[a.status]}</TableCell>
-              <TableCell>
-                <div className="flex justify-end gap-1">
-                  {a.status === "SCHEDULED" && (
-                    <>
-                      <form action={setAppointmentStatus}>
-                        <input type="hidden" name="id" value={a.id} />
-                        <input type="hidden" name="status" value="COMPLETED" />
-                        <Button type="submit" variant="ghost" size="icon" title="Concluir"><CheckCircle2 className="h-4 w-4 text-emerald-600" /></Button>
-                      </form>
-                      <form action={setAppointmentStatus}>
-                        <input type="hidden" name="id" value={a.id} />
-                        <input type="hidden" name="status" value="CANCELED" />
-                        <Button type="submit" variant="ghost" size="icon" title="Cancelar"><XCircle className="h-4 w-4 text-amber-600" /></Button>
-                      </form>
-                    </>
-                  )}
-                  <form action={deleteAppointment}>
-                    <input type="hidden" name="id" value={a.id} />
-                    <Button type="submit" variant="ghost" size="icon" title="Excluir"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                  </form>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-          {appointments.length === 0 && (
-            <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Sem agendamentos nessa data.</TableCell></TableRow>
-          )}
-        </TableBody>
-      </Table>
+      {appointments.length === 0 ? (
+        <EmptyState
+          icon={CalendarDays}
+          title="Nada nessa data"
+          description="Crie um novo agendamento usando o formulário acima ou escolha outra data."
+        />
+      ) : (
+        <Card className="card-elevated overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Hora</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Serviço</TableHead>
+                <TableHead>Profissional</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {appointments.map((a) => {
+                const s = STATUS[a.status];
+                return (
+                  <TableRow key={a.id}>
+                    <TableCell className="font-medium">
+                      {a.startsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}<span className="text-muted-foreground">–{a.endsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+                    </TableCell>
+                    <TableCell>{a.customer.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{a.service.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{a.professional.name}</TableCell>
+                    <TableCell className="text-right font-medium">{formatBRL(a.priceCents)}</TableCell>
+                    <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
+                    <TableCell className="w-32">
+                      <div className="flex justify-end gap-1">
+                        {a.status === "SCHEDULED" && (
+                          <>
+                            <form action={setAppointmentStatus}>
+                              <input type="hidden" name="id" value={a.id} />
+                              <input type="hidden" name="status" value="COMPLETED" />
+                              <Button type="submit" variant="ghost" size="icon" title="Concluir"><CheckCircle2 className="h-4 w-4 text-emerald-600" /></Button>
+                            </form>
+                            <form action={setAppointmentStatus}>
+                              <input type="hidden" name="id" value={a.id} />
+                              <input type="hidden" name="status" value="CANCELED" />
+                              <Button type="submit" variant="ghost" size="icon" title="Cancelar"><XCircle className="h-4 w-4 text-amber-600" /></Button>
+                            </form>
+                          </>
+                        )}
+                        <form action={deleteAppointment}>
+                          <input type="hidden" name="id" value={a.id} />
+                          <Button type="submit" variant="ghost" size="icon" title="Excluir"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                        </form>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
     </div>
   );
 }

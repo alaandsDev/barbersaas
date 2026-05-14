@@ -19,6 +19,14 @@ export default {
         destructive: { DEFAULT: "hsl(var(--destructive))", foreground: "hsl(var(--destructive-foreground))" },
         card: { DEFAULT: "hsl(var(--card))", foreground: "hsl(var(--card-foreground))" },
         popover: { DEFAULT: "hsl(var(--popover))", foreground: "hsl(var(--popover-foreground))" },
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          muted: "hsl(var(--sidebar-muted))",
+          active: "hsl(var(--sidebar-active))",
+        },
         // legado da landing
         brand: { DEFAULT: "hsl(var(--primary))", accent: "hsl(var(--accent))" },
       },

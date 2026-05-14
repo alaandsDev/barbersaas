@@ -1,10 +1,11 @@
-import { Trash2 } from "lucide-react";
+import { Trash2, UserCog } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/empty-state";
 import { createProfessional, deleteProfessional } from "./actions";
 
 export default async function ProfissionaisPage() {
@@ -28,30 +29,39 @@ export default async function ProfissionaisPage() {
         </CardContent>
       </Card>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Bio</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((p) => (
-            <TableRow key={p.id}>
-              <TableCell>{p.name}</TableCell>
-              <TableCell className="text-muted-foreground">{p.bio}</TableCell>
-              <TableCell className="text-right">
-                <form action={deleteProfessional}>
-                  <input type="hidden" name="id" value={p.id} />
-                  <Button type="submit" variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                </form>
-              </TableCell>
-            </TableRow>
-          ))}
-          {items.length === 0 && <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground">Nenhum profissional.</TableCell></TableRow>}
-        </TableBody>
-      </Table>
+      {items.length === 0 ? (
+        <EmptyState
+          icon={UserCog}
+          title="Cadastre os profissionais"
+          description="Cada profissional terá sua própria agenda e poderá receber agendamentos individualmente."
+        />
+      ) : (
+        <Card className="card-elevated overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Bio</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((p) => (
+                <TableRow key={p.id}>
+                  <TableCell className="font-medium">{p.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{p.bio}</TableCell>
+                  <TableCell className="w-10 text-right">
+                    <form action={deleteProfessional}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <Button type="submit" variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                    </form>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
     </div>
   );
 }

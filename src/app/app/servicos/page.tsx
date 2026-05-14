@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { Trash2, Scissors } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/utils";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/empty-state";
 import { createService, deleteService } from "./actions";
 
 export default async function ServicosPage() {
@@ -30,34 +31,41 @@ export default async function ServicosPage() {
         </CardContent>
       </Card>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Serviço</TableHead>
-            <TableHead>Duração</TableHead>
-            <TableHead>Preço</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {services.map((s) => (
-            <TableRow key={s.id}>
-              <TableCell>{s.name}</TableCell>
-              <TableCell>{s.durationMinutes} min</TableCell>
-              <TableCell>{formatBRL(s.priceCents)}</TableCell>
-              <TableCell className="text-right">
-                <form action={deleteService}>
-                  <input type="hidden" name="id" value={s.id} />
-                  <Button type="submit" variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                </form>
-              </TableCell>
-            </TableRow>
-          ))}
-          {services.length === 0 && (
-            <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Nenhum serviço cadastrado.</TableCell></TableRow>
-          )}
-        </TableBody>
-      </Table>
+      {services.length === 0 ? (
+        <EmptyState
+          icon={Scissors}
+          title="Cadastre seus serviços"
+          description="Adicione corte, barba, sobrancelha — qualquer serviço com preço e duração. Aparecerão na agenda."
+        />
+      ) : (
+        <Card className="card-elevated overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Serviço</TableHead>
+                <TableHead>Duração</TableHead>
+                <TableHead className="text-right">Preço</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {services.map((s) => (
+                <TableRow key={s.id}>
+                  <TableCell className="font-medium">{s.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{s.durationMinutes} min</TableCell>
+                  <TableCell className="text-right font-medium">{formatBRL(s.priceCents)}</TableCell>
+                  <TableCell className="w-10 text-right">
+                    <form action={deleteService}>
+                      <input type="hidden" name="id" value={s.id} />
+                      <Button type="submit" variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                    </form>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
     </div>
   );
 }
