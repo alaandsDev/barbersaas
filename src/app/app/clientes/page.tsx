@@ -1,5 +1,10 @@
+import { Trash2 } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { createCustomer, deleteCustomer } from "./actions";
 
 export default async function ClientesPage() {
@@ -14,38 +19,46 @@ export default async function ClientesPage() {
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Clientes</h1>
 
-      <form action={createCustomer} className="grid gap-3 rounded-xl border border-slate-200 p-4 md:grid-cols-[1fr_1fr_1fr_2fr_auto]">
-        <input name="name" required placeholder="Nome" className="rounded-lg border border-slate-300 px-3 py-2" />
-        <input name="phone" placeholder="Telefone" className="rounded-lg border border-slate-300 px-3 py-2" />
-        <input name="email" type="email" placeholder="Email" className="rounded-lg border border-slate-300 px-3 py-2" />
-        <input name="notes" placeholder="Observações" className="rounded-lg border border-slate-300 px-3 py-2" />
-        <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Adicionar</button>
-      </form>
+      <Card>
+        <CardContent className="p-4">
+          <form action={createCustomer} className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_2fr_auto]">
+            <Input name="name" required placeholder="Nome" />
+            <Input name="phone" placeholder="Telefone" />
+            <Input name="email" type="email" placeholder="Email" />
+            <Input name="notes" placeholder="Observações" />
+            <Button type="submit">Adicionar</Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left">
-            <tr><th className="p-3">Nome</th><th className="p-3">Telefone</th><th className="p-3">Email</th><th className="p-3">Atendimentos</th><th></th></tr>
-          </thead>
-          <tbody>
-            {items.map((c) => (
-              <tr key={c.id} className="border-t border-slate-200">
-                <td className="p-3">{c.name}</td>
-                <td className="p-3">{c.phone}</td>
-                <td className="p-3">{c.email}</td>
-                <td className="p-3">{c._count.appointments}</td>
-                <td className="p-3 text-right">
-                  <form action={deleteCustomer}>
-                    <input type="hidden" name="id" value={c.id} />
-                    <button className="text-xs text-red-600 hover:underline">excluir</button>
-                  </form>
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && <tr><td colSpan={5} className="p-4 text-center text-sm text-slate-500">Nenhum cliente.</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nome</TableHead>
+            <TableHead>Telefone</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Atendimentos</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.map((c) => (
+            <TableRow key={c.id}>
+              <TableCell>{c.name}</TableCell>
+              <TableCell>{c.phone}</TableCell>
+              <TableCell>{c.email}</TableCell>
+              <TableCell>{c._count.appointments}</TableCell>
+              <TableCell className="text-right">
+                <form action={deleteCustomer}>
+                  <input type="hidden" name="id" value={c.id} />
+                  <Button type="submit" variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </form>
+              </TableCell>
+            </TableRow>
+          ))}
+          {items.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">Nenhum cliente.</TableCell></TableRow>}
+        </TableBody>
+      </Table>
     </div>
   );
 }

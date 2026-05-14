@@ -1,19 +1,19 @@
+import { Trash2, CheckCircle2, XCircle } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { NewAppointmentForm } from "./new-appointment-form";
 import { setAppointmentStatus, deleteAppointment } from "./actions";
 
 const STATUS_LABEL: Record<string, string> = {
-  SCHEDULED: "Agendado",
-  COMPLETED: "Concluído",
-  CANCELED: "Cancelado",
-  NO_SHOW: "Não compareceu",
+  SCHEDULED: "Agendado", COMPLETED: "Concluído", CANCELED: "Cancelado", NO_SHOW: "Não compareceu",
 };
 
 export default async function AgendaPage({ searchParams }: { searchParams: { date?: string } }) {
   const { ctx } = await requireActiveSubscription();
-
   const day = searchParams.date ? new Date(searchParams.date) : new Date();
   day.setHours(0, 0, 0, 0);
   const next = new Date(day); next.setDate(next.getDate() + 1);
@@ -35,69 +35,67 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
       <div className="flex items-end justify-between">
         <h1 className="text-3xl font-bold">Agenda</h1>
         <form className="flex items-center gap-2">
-          <label className="text-sm text-slate-600">Data:</label>
-          <input type="date" name="date" defaultValue={todayISO} className="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-          <button className="rounded-lg border border-slate-300 px-3 py-2 text-sm">Ver</button>
+          <label className="text-sm text-muted-foreground">Data:</label>
+          <Input type="date" name="date" defaultValue={todayISO} className="w-auto" />
+          <Button variant="outline" type="submit">Ver</Button>
         </form>
       </div>
 
       <NewAppointmentForm professionals={professionals} services={services} customers={customers} />
 
-      <div className="overflow-hidden rounded-xl border border-slate-200">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left">
-            <tr>
-              <th className="p-3">Hora</th>
-              <th className="p-3">Cliente</th>
-              <th className="p-3">Serviço</th>
-              <th className="p-3">Profissional</th>
-              <th className="p-3">Valor</th>
-              <th className="p-3">Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {appointments.map((a) => (
-              <tr key={a.id} className="border-t border-slate-200">
-                <td className="p-3">
-                  {a.startsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}–
-                  {a.endsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                </td>
-                <td className="p-3">{a.customer.name}</td>
-                <td className="p-3">{a.service.name}</td>
-                <td className="p-3">{a.professional.name}</td>
-                <td className="p-3">{formatBRL(a.priceCents)}</td>
-                <td className="p-3">{STATUS_LABEL[a.status]}</td>
-                <td className="p-3">
-                  <div className="flex justify-end gap-2">
-                    {a.status === "SCHEDULED" && (
-                      <>
-                        <form action={setAppointmentStatus}>
-                          <input type="hidden" name="id" value={a.id} />
-                          <input type="hidden" name="status" value="COMPLETED" />
-                          <button className="text-xs text-emerald-700 hover:underline">concluir</button>
-                        </form>
-                        <form action={setAppointmentStatus}>
-                          <input type="hidden" name="id" value={a.id} />
-                          <input type="hidden" name="status" value="CANCELED" />
-                          <button className="text-xs text-amber-700 hover:underline">cancelar</button>
-                        </form>
-                      </>
-                    )}
-                    <form action={deleteAppointment}>
-                      <input type="hidden" name="id" value={a.id} />
-                      <button className="text-xs text-red-600 hover:underline">excluir</button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {appointments.length === 0 && (
-              <tr><td colSpan={7} className="p-4 text-center text-sm text-slate-500">Sem agendamentos nessa data.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Hora</TableHead>
+            <TableHead>Cliente</TableHead>
+            <TableHead>Serviço</TableHead>
+            <TableHead>Profissional</TableHead>
+            <TableHead>Valor</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {appointments.map((a) => (
+            <TableRow key={a.id}>
+              <TableCell>
+                {a.startsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}–
+                {a.endsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+              </TableCell>
+              <TableCell>{a.customer.name}</TableCell>
+              <TableCell>{a.service.name}</TableCell>
+              <TableCell>{a.professional.name}</TableCell>
+              <TableCell>{formatBRL(a.priceCents)}</TableCell>
+              <TableCell>{STATUS_LABEL[a.status]}</TableCell>
+              <TableCell>
+                <div className="flex justify-end gap-1">
+                  {a.status === "SCHEDULED" && (
+                    <>
+                      <form action={setAppointmentStatus}>
+                        <input type="hidden" name="id" value={a.id} />
+                        <input type="hidden" name="status" value="COMPLETED" />
+                        <Button type="submit" variant="ghost" size="icon" title="Concluir"><CheckCircle2 className="h-4 w-4 text-emerald-600" /></Button>
+                      </form>
+                      <form action={setAppointmentStatus}>
+                        <input type="hidden" name="id" value={a.id} />
+                        <input type="hidden" name="status" value="CANCELED" />
+                        <Button type="submit" variant="ghost" size="icon" title="Cancelar"><XCircle className="h-4 w-4 text-amber-600" /></Button>
+                      </form>
+                    </>
+                  )}
+                  <form action={deleteAppointment}>
+                    <input type="hidden" name="id" value={a.id} />
+                    <Button type="submit" variant="ghost" size="icon" title="Excluir"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  </form>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+          {appointments.length === 0 && (
+            <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Sem agendamentos nessa data.</TableCell></TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

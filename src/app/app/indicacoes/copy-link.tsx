@@ -1,19 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { Copy, Check } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export function CopyLink({ link }: { link: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <button
+    <Button
+      variant="outline"
       onClick={async () => {
         await navigator.clipboard.writeText(link);
         setCopied(true);
+        toast.success("Link copiado!");
         setTimeout(() => setCopied(false), 1500);
       }}
-      className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
     >
-      {copied ? "Copiado!" : "Copiar link"}
-    </button>
+      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+      {copied ? "Copiado" : "Copiar link"}
+    </Button>
   );
 }

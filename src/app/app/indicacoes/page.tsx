@@ -1,5 +1,6 @@
 import { requireUser, ensureLocalUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Card, CardContent } from "@/components/ui/card";
 import { CopyLink } from "./copy-link";
 
 export default async function IndicacoesPage() {
@@ -16,18 +17,20 @@ export default async function IndicacoesPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Indique e ganhe</h1>
-      <p className="text-slate-600">
+      <p className="text-muted-foreground">
         Convide outros barbeiros para o BarberOS. A cada indicação que assinar um plano, você ganha desconto na sua mensalidade.
       </p>
 
-      <div className="rounded-xl border border-slate-200 p-6">
-        <div className="text-sm text-slate-500">Seu link de indicação</div>
-        <div className="mt-2 break-all rounded-lg bg-slate-50 p-3 font-mono text-sm">{link}</div>
-        <div className="mt-3"><CopyLink link={link} /></div>
-        <div className="mt-6 text-sm">
-          Indicações confirmadas: <span className="font-semibold">{user?._count.referrals ?? 0}</span>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-sm text-muted-foreground">Seu link de indicação</div>
+          <div className="mt-2 break-all rounded-md bg-muted p-3 font-mono text-sm">{link}</div>
+          <div className="mt-3"><CopyLink link={link} /></div>
+          <div className="mt-6 text-sm">
+            Indicações confirmadas: <span className="font-semibold">{user?._count.referrals ?? 0}</span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

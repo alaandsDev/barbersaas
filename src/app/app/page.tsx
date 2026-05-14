@@ -1,6 +1,9 @@
+import { Calendar, DollarSign, Users } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default async function DashboardPage() {
   const { ctx } = await requireActiveSubscription();
@@ -31,51 +34,54 @@ export default async function DashboardPage() {
       <h1 className="text-3xl font-bold">Dashboard</h1>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card title="Agendamentos hoje" value={String(todays.length)} />
-        <Card title="Receita últimos 7d" value={formatBRL(revenue7d)} />
-        <Card title="Atendimentos 7d" value={String(week._count)} />
+        <Stat icon={Calendar} title="Agendamentos hoje" value={String(todays.length)} />
+        <Stat icon={DollarSign} title="Receita últimos 7d" value={formatBRL(revenue7d)} />
+        <Stat icon={Users} title="Atendimentos 7d" value={String(week._count)} />
       </div>
 
       <section>
         <h2 className="mb-3 text-xl font-semibold">Agenda de hoje</h2>
         {todays.length === 0 ? (
-          <p className="text-sm text-slate-500">Nenhum agendamento hoje.</p>
+          <p className="text-sm text-muted-foreground">Nenhum agendamento hoje.</p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-slate-200">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left">
-                <tr>
-                  <th className="p-3">Hora</th>
-                  <th className="p-3">Cliente</th>
-                  <th className="p-3">Serviço</th>
-                  <th className="p-3">Profissional</th>
-                  <th className="p-3">Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {todays.map((a) => (
-                  <tr key={a.id} className="border-t border-slate-200">
-                    <td className="p-3">{a.startsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</td>
-                    <td className="p-3">{a.customer.name}</td>
-                    <td className="p-3">{a.service.name}</td>
-                    <td className="p-3">{a.professional.name}</td>
-                    <td className="p-3">{formatBRL(a.priceCents)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Hora</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Serviço</TableHead>
+                <TableHead>Profissional</TableHead>
+                <TableHead>Valor</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {todays.map((a) => (
+                <TableRow key={a.id}>
+                  <TableCell>{a.startsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</TableCell>
+                  <TableCell>{a.customer.name}</TableCell>
+                  <TableCell>{a.service.name}</TableCell>
+                  <TableCell>{a.professional.name}</TableCell>
+                  <TableCell>{formatBRL(a.priceCents)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </section>
     </div>
   );
 }
 
-function Card({ title, value }: { title: string; value: string }) {
+function Stat({ icon: Icon, title, value }: { icon: any; title: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 p-5">
-      <div className="text-sm text-slate-500">{title}</div>
-      <div className="mt-2 text-3xl font-bold">{value}</div>
-    </div>
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">{title}</div>
+          <Icon className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <div className="mt-2 text-3xl font-bold">{value}</div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,29 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export function CheckoutButton({ plan }: { plan: "BASIC" | "PRO" | "PREMIUM" }) {
   const [loading, setLoading] = useState(false);
 
   async function onClick() {
     setLoading(true);
-    const res = await fetch("/api/stripe/checkout", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ plan }),
-    });
-    const data = await res.json();
-    if (data.url) location.href = data.url;
-    else { alert(data.error ?? "Erro"); setLoading(false); }
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.url) location.href = data.url;
+      else { toast.error(data.error ?? "Erro ao iniciar checkout"); setLoading(false); }
+    } catch (e) {
+      toast.error("Erro de conexão");
+      setLoading(false);
+    }
   }
 
   return (
-    <button
-      onClick={onClick}
-      disabled={loading}
-      className="w-full rounded-lg bg-brand py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
-    >
-      {loading ? "..." : "Assinar"}
-    </button>
+    <Button onClick={onClick} disabled={loading} className="w-full">
+      {loading ? "Carregando..." : "Assinar"}
+    </Button>
   );
 }

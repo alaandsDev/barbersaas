@@ -3,7 +3,12 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function SignupPage() {
   return (
@@ -21,13 +26,10 @@ function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
     const supabase = createClient();
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -38,55 +40,46 @@ function SignupForm() {
       },
     });
     setLoading(false);
-    if (error) { setError(error.message); return; }
+    if (error) { toast.error(error.message); return; }
     if (data.session) {
       router.push("/onboarding");
       router.refresh();
     } else {
-      setInfo("Verifique seu email para confirmar a conta.");
+      toast.success("Conta criada! Verifique seu email para confirmar.");
     }
   }
 
   return (
-    <div className="mx-auto mt-24 max-w-sm px-6">
-      <h1 className="text-2xl font-bold">Criar conta</h1>
-      <p className="mt-2 text-sm text-slate-600">Comece grátis em 2 minutos.</p>
+    <div className="flex min-h-screen items-center justify-center px-6">
+      <Card className="w-full max-w-sm">
+        <CardContent className="p-8">
+          <Link href="/" className="mb-1 block text-xl font-bold">BarberOS</Link>
+          <h1 className="text-2xl font-bold">Criar conta</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Comece grátis em 2 minutos.</p>
 
-      <form onSubmit={onSubmit} className="mt-8 space-y-4">
-        <div>
-          <label className="block text-sm font-medium">Nome</label>
-          <input
-            required value={name} onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">Email</label>
-          <input
-            type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">Senha</label>
-          <input
-            type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-          />
-        </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {info && <p className="text-sm text-emerald-600">{info}</p>}
-        <button
-          type="submit" disabled={loading}
-          className="w-full rounded-lg bg-brand-accent py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
-        >
-          {loading ? "Criando..." : "Criar conta"}
-        </button>
-      </form>
+          <form onSubmit={onSubmit} className="mt-6 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome</Label>
+              <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha</Label>
+              <Input id="password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <Button type="submit" variant="accent" disabled={loading} className="w-full">
+              {loading ? "Criando..." : "Criar conta"}
+            </Button>
+          </form>
 
-      <p className="mt-6 text-center text-sm text-slate-600">
-        Já tem conta? <Link href="/login" className="font-medium text-brand-accent hover:underline">Entrar</Link>
-      </p>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Já tem conta? <Link href="/login" className="font-medium text-foreground hover:underline">Entrar</Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
