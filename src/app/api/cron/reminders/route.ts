@@ -5,8 +5,8 @@ import { sendBookingReminder } from "@/lib/email";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Roda a cada hora via Vercel Cron
-// Envia lembrete para appointments começando entre 1-2h à frente que ainda não receberam.
+// Roda 1x ao dia (12h UTC = 9h BRT) via Vercel Cron (Hobby plan limit)
+// Envia lembrete para appointments do dia que ainda não receberam.
 export async function GET(req: Request) {
   // Vercel Cron envia header de autorização — bloqueia chamadas externas
   const auth = req.headers.get("authorization");
@@ -15,14 +15,13 @@ export async function GET(req: Request) {
   }
 
   const now = new Date();
-  const inOneHour = new Date(now.getTime() + 60 * 60_000);
-  const inTwoHours = new Date(now.getTime() + 120 * 60_000);
+  const dayEnd = new Date(now); dayEnd.setHours(23, 59, 59, 999);
 
   const due = await prisma.appointment.findMany({
     where: {
       status: "SCHEDULED",
       reminderSentAt: null,
-      startsAt: { gte: inOneHour, lt: inTwoHours },
+      startsAt: { gte: now, lt: dayEnd },
     },
     include: {
       customer: { select: { name: true, email: true } },
