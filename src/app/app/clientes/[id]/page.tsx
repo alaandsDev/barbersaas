@@ -53,7 +53,7 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
       <div className="flex items-start gap-4">
         <Avatar name={customer.name} size="lg" />
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{customer.name}</h1>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{customer.name}</h1>
           <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
             {customer.phone && <span className="inline-flex items-center gap-1"><Phone className="h-3.5 w-3.5" /> {customer.phone}</span>}
             {customer.email && <span className="inline-flex items-center gap-1"><Mail className="h-3.5 w-3.5" /> {customer.email}</span>}

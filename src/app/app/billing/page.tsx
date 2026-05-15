@@ -16,7 +16,7 @@ export default async function BillingPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Plano & Cobrança</h1>
+      <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Plano & Cobrança</h1>
 
       <Card>
         <CardContent className="p-6">

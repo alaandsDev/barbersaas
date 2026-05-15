@@ -69,9 +69,9 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Financeiro</h1>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Financeiro</h1>
           <p className="mt-1 text-sm text-muted-foreground">Receita, comissões e desempenho por profissional</p>
         </div>
         <div className="flex gap-1 rounded-lg border border-white/10 bg-white/[0.02] p-1">

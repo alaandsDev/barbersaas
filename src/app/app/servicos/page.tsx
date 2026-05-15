@@ -18,7 +18,7 @@ export default async function ServicosPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Serviços</h1>
+      <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Serviços</h1>
 
       <Card>
         <CardContent className="p-4">

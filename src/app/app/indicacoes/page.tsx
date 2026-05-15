@@ -16,7 +16,7 @@ export default async function IndicacoesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Indique e ganhe</h1>
+      <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Indique e ganhe</h1>
       <p className="text-muted-foreground">
         Convide outros barbeiros para o BarberOS. A cada indicação que assinar um plano, você ganha desconto na sua mensalidade.
       </p>

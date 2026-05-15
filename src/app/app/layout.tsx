@@ -19,15 +19,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const initial = (user.email ?? "?").charAt(0).toUpperCase();
 
   return (
-    <div data-mode="dark" className="flex h-screen overflow-hidden bg-background text-foreground">
+    <div data-mode="dark" className="flex min-h-screen bg-background text-foreground md:h-screen md:overflow-hidden">
       <Sidebar
         businessName={business?.name ?? ""}
         plan={business?.subscription?.plan ?? "—"}
         status={business?.subscription?.status ?? "INACTIVE"}
       />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col md:overflow-hidden">
         <Topbar userEmail={user.email ?? ""} userInitial={initial} />
-        <main className="flex-1 overflow-y-auto p-8">{children}</main>
+        <main className="flex-1 p-4 md:overflow-y-auto md:p-8">{children}</main>
       </div>
       <CommandPalette />
     </div>

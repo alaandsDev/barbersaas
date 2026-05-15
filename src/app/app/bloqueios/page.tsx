@@ -25,7 +25,7 @@ export default async function BloqueiosPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Bloqueios</h1>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Bloqueios</h1>
         <p className="mt-1 text-sm text-muted-foreground">Marque folgas, almoços e horários indisponíveis. Ninguém poderá agendar nesses períodos.</p>
       </div>
 

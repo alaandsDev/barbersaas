@@ -19,7 +19,7 @@ export default async function ClientesPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Clientes</h1>
+      <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Clientes</h1>
 
       <Card>
         <CardContent className="p-4">

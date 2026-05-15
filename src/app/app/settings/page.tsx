@@ -17,7 +17,7 @@ export default async function SettingsPage() {
   return (
     <div className="max-w-3xl space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Configurações</h1>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Configurações</h1>
         <p className="mt-1 text-sm text-muted-foreground">Personalize a página pública da sua barbearia.</p>
       </div>
 

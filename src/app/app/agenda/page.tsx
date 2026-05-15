@@ -55,8 +55,8 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
 
     return (
       <div className="space-y-6">
-        <div className="flex items-end justify-between">
-          <h1 className="text-3xl font-bold">Agenda</h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Agenda</h1>
           {switcher}
         </div>
 
@@ -93,14 +93,13 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between">
-        <h1 className="text-3xl font-bold">Agenda</h1>
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Agenda</h1>
+        <div className="flex flex-wrap items-center gap-3">
           <form className="flex items-center gap-2">
             <input type="hidden" name="view" value="list" />
-            <label className="text-sm text-muted-foreground">Data:</label>
             <Input type="date" name="date" defaultValue={todayISO} className="w-auto" />
-            <Button variant="outline" type="submit" size="sm">Ver</Button>
+            <Button variant="outline" type="submit" size="sm" className="border-white/10 bg-white/[0.02]">Ver</Button>
           </form>
           {switcher}
         </div>

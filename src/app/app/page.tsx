@@ -84,14 +84,14 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* HEADER */}
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{greeting}.</h1>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{greeting}.</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Resumo de {now.toLocaleDateString("pt-BR", { timeZone: BR_TZ, weekday: "long", day: "2-digit", month: "long" })}
           </p>
         </div>
-        <Button asChild variant="accent" size="sm">
+        <Button asChild variant="accent" size="sm" className="self-start sm:self-auto">
           <Link href="/app/agenda">
             <CalendarPlus className="h-4 w-4" /> Novo agendamento
           </Link>
@@ -264,7 +264,7 @@ function KpiCard({ icon: Icon, label, value, delta, sublabel, glow, trend, trend
       <div className="flex items-start justify-between">
         <div className="min-w-0">
           <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
-          <div className="mt-3 text-4xl font-bold tracking-tight">{value}</div>
+          <div className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">{value}</div>
           <div className="mt-2 flex items-center gap-2">
             <DeltaPill value={delta} />
             {sublabel && <span className="truncate text-xs text-muted-foreground">{sublabel}</span>}
