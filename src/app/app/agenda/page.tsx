@@ -32,11 +32,11 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
   ]);
 
   const switcher = (
-    <div className="flex gap-1 rounded-lg border bg-white p-1">
-      <Link href="/app/agenda?view=list" className={cn("inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium", view === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+    <div className="flex gap-1 rounded-lg border border-white/10 bg-white/[0.02] p-1">
+      <Link href="/app/agenda?view=list" className={cn("inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium", view === "list" ? "bg-amber-400 text-amber-950" : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground")}>
         <List className="h-3.5 w-3.5" /> Lista
       </Link>
-      <Link href="/app/agenda?view=week" className={cn("inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium", view === "week" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+      <Link href="/app/agenda?view=week" className={cn("inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium", view === "week" ? "bg-amber-400 text-amber-950" : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground")}>
         <LayoutGrid className="h-3.5 w-3.5" /> Semana
       </Link>
     </div>

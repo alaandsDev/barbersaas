@@ -66,7 +66,7 @@ export function NotificationBell() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="relative grid h-9 w-9 place-items-center rounded-lg border bg-white hover:bg-muted"
+        className="relative grid h-9 w-9 place-items-center rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.06]"
         aria-label="Notificações"
       >
         <Bell className="h-4 w-4 text-muted-foreground" />
@@ -78,7 +78,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="card-floating absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-xl border bg-white">
+        <div className="card-floating absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-xl border border-white/5 bg-popover">
           <div className="flex items-center justify-between border-b px-4 py-2.5">
             <div className="text-sm font-semibold">Notificações</div>
             {unread > 0 && (
@@ -100,10 +100,10 @@ export function NotificationBell() {
                       <Wrap
                         {...props}
                         onClick={() => { if (!n.readAt) markOne(n.id); setOpen(false); }}
-                        className={`block px-4 py-3 transition-colors hover:bg-muted/60 ${!n.readAt ? "bg-blue-50/40" : ""}`}
+                        className={`block px-4 py-3 transition-colors hover:bg-muted/60 ${!n.readAt ? "bg-amber-400/[0.04]" : ""}`}
                       >
                         <div className="flex items-start gap-2">
-                          {!n.readAt && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />}
+                          {!n.readAt && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />}
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium">{n.title}</div>
                             {n.body && <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.body}</div>}

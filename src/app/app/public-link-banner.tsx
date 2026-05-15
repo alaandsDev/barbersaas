@@ -8,23 +8,23 @@ import { toast } from "sonner";
 export function PublicLinkBanner({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border bg-gradient-to-r from-primary to-[hsl(230,60%,22%)] p-4 text-white sm:flex-row sm:items-center">
-      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/15">
-        <Link2 className="h-4 w-4" />
+    <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-r from-[hsl(230,30%,10%)] to-[hsl(230,30%,12%)] p-4 sm:flex-row sm:items-center">
+      <div className="absolute inset-0 -z-10 opacity-60 [background:radial-gradient(circle_at_top_right,hsl(38_95%_50%/.10),transparent_60%)]" />
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-amber-400/10 ring-1 ring-amber-400/20">
+        <Link2 className="h-4 w-4 text-amber-400" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold">Sua página pública de agendamento</div>
-        <div className="mt-1 truncate font-mono text-xs text-white/70">{url}</div>
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Link público de agendamento</div>
+        <div className="mt-0.5 truncate font-mono text-sm text-foreground/80">{url}</div>
       </div>
       <div className="flex shrink-0 gap-2">
         <button
           onClick={async () => {
             await navigator.clipboard.writeText(url);
-            setCopied(true);
-            toast.success("Link copiado");
+            setCopied(true); toast.success("Link copiado");
             setTimeout(() => setCopied(false), 1500);
           }}
-          className="inline-flex items-center gap-1.5 rounded-md bg-white/15 px-3 py-1.5 text-xs font-medium hover:bg-white/25"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-white/[0.08]"
         >
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? "Copiado" : "Copiar"}
@@ -32,7 +32,7 @@ export function PublicLinkBanner({ url }: { url: string }) {
         <Link
           href={url}
           target="_blank"
-          className="inline-flex items-center gap-1.5 rounded-md bg-amber-400 px-3 py-1.5 text-xs font-semibold text-amber-950 hover:bg-amber-300"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 px-3 py-1.5 text-xs font-semibold text-amber-950 hover:bg-amber-300"
         >
           Abrir <ExternalLink className="h-3.5 w-3.5" />
         </Link>

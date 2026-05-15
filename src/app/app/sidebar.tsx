@@ -2,71 +2,114 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, LayoutDashboard, Users, Scissors, BadgeDollarSign, UserCog, Gift, LogOut, Sparkles, BarChart3, Settings, Ban } from "lucide-react";
+import {
+  Calendar, LayoutDashboard, Users, Scissors, BadgeDollarSign, UserCog, Gift, LogOut, BarChart3, Settings, Ban,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const nav = [
-  { href: "/app", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/app/agenda", label: "Agenda", icon: Calendar },
-  { href: "/app/bloqueios", label: "Bloqueios", icon: Ban },
-  { href: "/app/clientes", label: "Clientes", icon: Users },
-  { href: "/app/profissionais", label: "Profissionais", icon: UserCog },
-  { href: "/app/servicos", label: "Serviços", icon: Scissors },
-  { href: "/app/financeiro", label: "Financeiro", icon: BarChart3 },
-  { href: "/app/indicacoes", label: "Indique e ganhe", icon: Gift },
-  { href: "/app/settings", label: "Configurações", icon: Settings },
-  { href: "/app/billing", label: "Plano & Cobrança", icon: BadgeDollarSign },
+const groups = [
+  {
+    title: "Geral",
+    items: [
+      { href: "/app", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/app/agenda", label: "Agenda", icon: Calendar },
+      { href: "/app/bloqueios", label: "Bloqueios", icon: Ban },
+    ],
+  },
+  {
+    title: "Operação",
+    items: [
+      { href: "/app/clientes", label: "Clientes", icon: Users },
+      { href: "/app/profissionais", label: "Profissionais", icon: UserCog },
+      { href: "/app/servicos", label: "Serviços", icon: Scissors },
+    ],
+  },
+  {
+    title: "Negócio",
+    items: [
+      { href: "/app/financeiro", label: "Financeiro", icon: BarChart3 },
+      { href: "/app/indicacoes", label: "Indicações", icon: Gift },
+      { href: "/app/settings", label: "Configurações", icon: Settings },
+      { href: "/app/billing", label: "Cobrança", icon: BadgeDollarSign },
+    ],
+  },
 ];
 
 export function Sidebar({ businessName, plan, status }: { businessName: string; plan: string; status: string }) {
   const pathname = usePathname();
+  const trialing = status === "TRIALING";
 
   return (
-    <aside className="sticky top-0 flex h-screen w-[260px] shrink-0 flex-col self-start bg-sidebar text-sidebar-foreground">
-      <div className="flex items-center gap-2 px-5 py-5">
-        <div className="grid h-9 w-9 place-items-center rounded-lg bg-accent text-accent-foreground">
-          <Scissors className="h-4 w-4" />
+    <aside className="sticky top-0 flex h-screen w-[232px] shrink-0 flex-col self-start border-r border-white/5 bg-sidebar text-sidebar-foreground">
+      {/* logo + brand */}
+      <div className="flex items-center gap-2.5 px-5 py-5">
+        <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-amber-300 to-amber-500 text-amber-950 shadow-[0_0_20px_-5px_rgba(245,158,11,0.6)]">
+          <Scissors className="h-3.5 w-3.5" />
         </div>
-        <div>
-          <div className="text-base font-bold leading-none text-white">BarberOS</div>
-          <div className="mt-1 text-xs text-sidebar-muted">{businessName}</div>
+        <div className="min-w-0">
+          <div className="text-sm font-bold leading-none text-white">BarberOS</div>
+          <div className="mt-1 truncate text-[10px] uppercase tracking-wider text-sidebar-muted">{businessName}</div>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3">
-        {nav.map((n) => {
-          const active = n.href === "/app" ? pathname === "/app" : pathname.startsWith(n.href);
-          return (
-            <Link
-              key={n.href}
-              href={n.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                active
-                  ? "bg-sidebar-active text-white"
-                  : "text-sidebar-foreground hover:bg-sidebar-active/60 hover:text-white"
-              )}
-            >
-              <n.icon className={cn("h-4 w-4", active ? "text-accent" : "text-sidebar-muted")} />
-              {n.label}
-            </Link>
-          );
-        })}
+      {/* nav */}
+      <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
+        {groups.map((g) => (
+          <div key={g.title}>
+            <div className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted/70">
+              {g.title}
+            </div>
+            <div className="space-y-0.5">
+              {g.items.map((n) => {
+                const active = n.href === "/app" ? pathname === "/app" : pathname.startsWith(n.href);
+                return (
+                  <Link
+                    key={n.href}
+                    href={n.href}
+                    className={cn(
+                      "group relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] transition-all",
+                      active
+                        ? "bg-sidebar-active text-white"
+                        : "text-sidebar-foreground hover:bg-sidebar-active/50 hover:text-white"
+                    )}
+                  >
+                    {active && (
+                      <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-amber-400" />
+                    )}
+                    <n.icon className={cn(
+                      "h-3.5 w-3.5 transition-colors",
+                      active ? "text-amber-400" : "text-sidebar-muted group-hover:text-sidebar-foreground"
+                    )} />
+                    <span>{n.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      <div className="space-y-3 border-t border-white/5 p-4">
-        <div className="rounded-lg bg-sidebar-active/60 p-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-accent">
-            <Sparkles className="h-3 w-3" /> Plano {plan}
+      {/* footer */}
+      <div className="border-t border-white/5 p-3 space-y-2">
+        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5">
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-sidebar-muted">Plano</div>
+            {trialing && (
+              <span className="rounded-full bg-amber-400/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-400">
+                Trial
+              </span>
+            )}
           </div>
-          <div className="mt-1 text-xs text-sidebar-muted capitalize">{status.toLowerCase().replace("_", " ")}</div>
+          <div className="mt-0.5 flex items-baseline gap-1.5">
+            <span className="text-sm font-bold text-white">{plan}</span>
+          </div>
         </div>
         <form action="/auth/signout" method="post">
           <button
             type="submit"
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-active/60 hover:text-white"
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] text-sidebar-muted transition-all hover:bg-sidebar-active/50 hover:text-white"
           >
-            <LogOut className="h-4 w-4" /> Sair
+            <LogOut className="h-3.5 w-3.5" /> Sair
           </button>
         </form>
       </div>

@@ -19,7 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const initial = (user.email ?? "?").charAt(0).toUpperCase();
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div data-mode="dark" className="flex h-screen overflow-hidden bg-background text-foreground">
       <Sidebar
         businessName={business?.name ?? ""}
         plan={business?.subscription?.plan ?? "—"}

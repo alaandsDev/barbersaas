@@ -74,12 +74,12 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
           <h1 className="text-3xl font-bold tracking-tight">Financeiro</h1>
           <p className="mt-1 text-sm text-muted-foreground">Receita, comissões e desempenho por profissional</p>
         </div>
-        <div className="flex gap-1 rounded-lg border bg-white p-1">
+        <div className="flex gap-1 rounded-lg border border-white/10 bg-white/[0.02] p-1">
           {RANGES.map((r) => (
             <Link
               key={r.key}
               href={`/app/financeiro?range=${r.key}`}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${r.key === range.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${r.key === range.key ? "bg-amber-400 text-amber-950" : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground"}`}
             >
               {r.label}
             </Link>
@@ -89,9 +89,9 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-3">
-        <KpiCard icon={Receipt} label="Receita bruta" value={formatBRL(totalRevenue)} sublabel={`${completed.length} atendimentos`} gradient="from-blue-500/10 to-blue-50" iconColor="text-blue-600" />
-        <KpiCard icon={Users} label="Comissões a pagar" value={formatBRL(totalCommissions)} sublabel="Soma das comissões dos profissionais" gradient="from-amber-500/10 to-amber-50" iconColor="text-amber-600" />
-        <KpiCard icon={TrendingUp} label="Líquido" value={formatBRL(net)} sublabel="Receita − comissões" gradient="from-emerald-500/10 to-emerald-50" iconColor="text-emerald-600" />
+        <KpiCard icon={Receipt} label="Receita bruta" value={formatBRL(totalRevenue)} sublabel={`${completed.length} atendimentos`} glow="glow-blue" iconRing="bg-blue-500/10 ring-blue-500/20 text-blue-400" />
+        <KpiCard icon={Users} label="Comissões a pagar" value={formatBRL(totalCommissions)} sublabel="Soma das comissões dos profissionais" glow="glow-amber" iconRing="bg-amber-400/10 ring-amber-400/20 text-amber-400" />
+        <KpiCard icon={TrendingUp} label="Líquido" value={formatBRL(net)} sublabel="Receita − comissões" glow="glow-emerald" iconRing="bg-emerald-500/10 ring-emerald-500/20 text-emerald-400" />
       </div>
 
       {/* chart */}
@@ -181,19 +181,20 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
   );
 }
 
-function KpiCard({ icon: Icon, label, value, sublabel, gradient, iconColor }: {
-  icon: any; label: string; value: string; sublabel?: string; gradient: string; iconColor: string;
+function KpiCard({ icon: Icon, label, value, sublabel, glow, iconRing }: {
+  icon: any; label: string; value: string; sublabel?: string; glow: string; iconRing: string;
 }) {
   return (
-    <Card className={`card-elevated relative overflow-hidden bg-gradient-to-br ${gradient} p-6`}>
+    <Card className="ring-card relative overflow-hidden border-white/5 bg-card p-6">
+      <div className={`pointer-events-none absolute inset-0 -z-10 ${glow}`} />
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-sm font-medium text-muted-foreground">{label}</div>
-          <div className="mt-2 text-3xl font-bold tracking-tight">{value}</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
+          <div className="mt-3 text-3xl font-bold tracking-tight">{value}</div>
           {sublabel && <div className="mt-1 text-xs text-muted-foreground">{sublabel}</div>}
         </div>
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/80 shadow-sm">
-          <Icon className={`h-5 w-5 ${iconColor}`} />
+        <div className={`grid h-10 w-10 place-items-center rounded-xl ring-1 ${iconRing}`}>
+          <Icon className="h-5 w-5" />
         </div>
       </div>
     </Card>
