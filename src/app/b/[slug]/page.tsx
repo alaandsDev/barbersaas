@@ -33,56 +33,52 @@ export default async function PublicBookingPage({ params }: { params: { slug: st
 
   return (
     <div className="min-h-screen">
-      {/* COVER */}
+      {/* COVER compacto */}
       <div
-        className="relative h-44 w-full"
+        className="relative h-20 w-full"
         style={{ background: `linear-gradient(135deg, ${brand} 0%, ${shade(brand, -25)} 100%)` }}
       >
         <div className="absolute inset-0 [background:radial-gradient(circle_at_top_right,rgba(255,255,255,.18),transparent_60%)]" />
-        {business.coverEmoji && (
-          <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-30">{business.coverEmoji}</div>
-        )}
       </div>
 
-      <div className="mx-auto -mt-12 max-w-2xl px-6">
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <div className="flex items-start gap-4">
+      <div className="mx-auto -mt-8 max-w-2xl px-4">
+        <div className="rounded-xl border bg-white p-4 shadow-sm">
+          <div className="flex items-center gap-3">
             <div
-              className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-white shadow-sm"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-white shadow-sm"
               style={{ background: brand }}
             >
               {business.coverEmoji ? (
-                <span className="text-2xl">{business.coverEmoji}</span>
+                <span className="text-lg">{business.coverEmoji}</span>
               ) : (
-                <Scissors className="h-6 w-6" />
+                <Scissors className="h-5 w-5" />
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="truncate text-xl font-bold">{business.name}</h1>
-              {business.bio && <p className="mt-1 text-sm text-slate-600">{business.bio}</p>}
-              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-base font-bold">{business.name}</h1>
+                <span className="hidden items-center gap-0.5 text-xs text-slate-500 sm:inline-flex">
+                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> 4.9
+                </span>
+              </div>
+              {business.bio && <p className="mt-0.5 line-clamp-1 text-xs text-slate-600">{business.bio}</p>}
+              <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
                 {business.phone && (
                   <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {business.phone}</span>
                 )}
-                <span className="inline-flex items-center gap-1">
-                  <div className="flex">
-                    {[1,2,3,4,5].map((i) => <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />)}
-                  </div>
-                  4.9
-                </span>
+                {weeklyCount > 0 && (
+                  <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                    <Users className="h-3 w-3" />
+                    {weeklyCount} {weeklyCount === 1 ? "agendamento" : "agendamentos"} essa semana
+                  </span>
+                )}
               </div>
             </div>
           </div>
-          {weeklyCount > 0 && (
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200">
-              <Users className="h-3 w-3" />
-              {weeklyCount} {weeklyCount === 1 ? "agendamento" : "agendamentos"} essa semana
-            </div>
-          )}
         </div>
       </div>
 
-      <main className="mx-auto max-w-2xl px-6 py-8">
+      <main className="mx-auto max-w-2xl px-4 py-6">
         {!subOk ? (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
             <h2 className="text-lg font-semibold">Agenda temporariamente indisponível</h2>
