@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendBookingConfirmation } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
+import { parseBR, fmtBrTime, fmtBrShort } from "@/lib/utils";
 
 // Janela de funcionamento padrão (a evoluir pra config por barbearia)
 const OPEN_HOUR = 9;
@@ -26,8 +27,8 @@ export async function getAvailableSlots(input: z.infer<typeof slotsSchema>): Pro
   });
   if (!service) return [];
 
-  const dayStart = new Date(`${p.date}T00:00:00`);
-  const dayEnd = new Date(dayStart); dayEnd.setDate(dayEnd.getDate() + 1);
+  const dayStart = parseBR(p.date); // 00:00 BRT
+  const dayEnd = new Date(dayStart.getTime() + 24 * 3600_000);
 
   const busy = await prisma.appointment.findMany({
     where: {
@@ -41,8 +42,9 @@ export async function getAvailableSlots(input: z.infer<typeof slotsSchema>): Pro
 
   const now = new Date();
   const slots: SlotInfo[] = [];
-  const start = new Date(dayStart); start.setHours(OPEN_HOUR, 0, 0, 0);
-  const close = new Date(dayStart); close.setHours(CLOSE_HOUR, 0, 0, 0);
+  // dayStart é 00:00 BRT (como UTC). OPEN_HOUR e CLOSE_HOUR sao horas locais BRT.
+  const start = new Date(dayStart.getTime() + OPEN_HOUR * 3600_000);
+  const close = new Date(dayStart.getTime() + CLOSE_HOUR * 3600_000);
 
   for (let t = start.getTime(); t + service.durationMinutes * 60_000 <= close.getTime(); t += SLOT_MINUTES * 60_000) {
     const slotStart = new Date(t);
@@ -51,7 +53,7 @@ export async function getAvailableSlots(input: z.infer<typeof slotsSchema>): Pro
     const overlap = busy.some((b) => slotStart < b.endsAt && slotEnd > b.startsAt);
     slots.push({
       iso: slotStart.toISOString(),
-      label: slotStart.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+      label: fmtBrTime(slotStart),
       available: !inPast && !overlap,
     });
   }
@@ -136,7 +138,7 @@ export async function bookPublicAppointment(input: z.infer<typeof bookSchema>): 
     businessId: p.businessId,
     kind: "appointment.created",
     title: "Novo agendamento",
-    body: `${customer.name} agendou ${service.name} com ${professional.name} em ${startsAt.toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`,
+    body: `${customer.name} agendou ${service.name} com ${professional.name} em ${fmtBrShort(startsAt)} ${fmtBrTime(startsAt)}`,
     link: "/app/agenda",
   });
 

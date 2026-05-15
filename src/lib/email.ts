@@ -37,7 +37,7 @@ function shell(content: string) {
 }
 
 function fmtDateTime(d: Date) {
-  return d.toLocaleString("pt-BR", { weekday: "long", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", weekday: "long", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit" });
 }
 
 export async function sendWelcomeEmail({ to, name, businessName }: { to: string; name?: string | null; businessName: string }) {

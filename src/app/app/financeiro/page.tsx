@@ -2,7 +2,7 @@ import Link from "next/link";
 import { TrendingUp, BarChart3, Receipt, Users } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, startOfBrDay, addDays, BR_TZ } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Sparkline } from "@/components/ui/sparkline";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -19,8 +19,7 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
   const { ctx } = await requireActiveSubscription();
   const range = RANGES.find((r) => r.key === searchParams.range) ?? RANGES[0];
 
-  const start = new Date(); start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - (range.days - 1));
+  const start = addDays(startOfBrDay(new Date()), -(range.days - 1));
 
   const completed = await prisma.appointment.findMany({
     where: { businessId: ctx.businessId, status: "COMPLETED", startsAt: { gte: start } },
@@ -35,10 +34,10 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
   const totalCommissions = completed.reduce((s, a) => s + Math.round(a.priceCents * a.professional.commissionPercent / 100), 0);
   const net = totalRevenue - totalCommissions;
 
-  // por dia
+  // por dia (em BRT)
   const dailyRevenue = Array.from({ length: range.days }, (_, i) => {
-    const d = new Date(start); d.setDate(d.getDate() + i);
-    return completed.filter((a) => sameDay(a.startsAt, d)).reduce((s, a) => s + a.priceCents, 0);
+    const d = addDays(start, i);
+    return completed.filter((a) => sameBrDay(a.startsAt, d)).reduce((s, a) => s + a.priceCents, 0);
   });
 
   // por profissional
@@ -201,6 +200,7 @@ function KpiCard({ icon: Icon, label, value, sublabel, gradient, iconColor }: {
   );
 }
 
-function sameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+function sameBrDay(a: Date, b: Date) {
+  const f = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: BR_TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+  return f(a) === f(b);
 }

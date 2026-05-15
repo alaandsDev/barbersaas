@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendBookingReminder } from "@/lib/email";
+import { startOfBrDay, addDays } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export async function GET(req: Request) {
   }
 
   const now = new Date();
-  const dayEnd = new Date(now); dayEnd.setHours(23, 59, 59, 999);
+  const dayEnd = addDays(startOfBrDay(now), 1);
 
   const due = await prisma.appointment.findMany({
     where: {

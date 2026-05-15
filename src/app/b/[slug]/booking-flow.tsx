@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { formatBRL, cn } from "@/lib/utils";
+import { formatBRL, cn, fmtBrDateTime } from "@/lib/utils";
 import { getAvailableSlots, bookPublicAppointment, type SlotInfo } from "./actions";
 
 type Service = { id: string; name: string; priceCents: number; durationMinutes: number };
@@ -65,7 +65,7 @@ export function BookingFlow({ businessId, services, professionals, brandColor = 
         <div className="mx-auto mt-6 max-w-xs space-y-2 rounded-xl border bg-slate-50 p-4 text-left text-sm">
           <Row label="Serviço" value={service.name} />
           <Row label="Profissional" value={professional.name} />
-          <Row label="Quando" value={d.toLocaleString("pt-BR", { weekday: "long", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit" })} />
+          <Row label="Quando" value={fmtBrDateTime(d)} />
           <Row label="Valor" value={formatBRL(service.priceCents)} />
         </div>
       </Card>
@@ -173,7 +173,7 @@ export function BookingFlow({ businessId, services, professionals, brandColor = 
           <div className="mt-4 rounded-xl border bg-slate-50 p-3 text-sm">
             <Row label="Serviço" value={service.name} />
             <Row label="Profissional" value={professional.name} />
-            <Row label="Quando" value={new Date(slot).toLocaleString("pt-BR", { weekday: "long", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit" })} />
+            <Row label="Quando" value={fmtBrDateTime(new Date(slot))} />
             <Row label="Valor" value={formatBRL(service.priceCents)} />
           </div>
 

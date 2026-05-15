@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn, formatBRL } from "@/lib/utils";
+import { cn, formatBRL, fmtBrTime, BR_TZ } from "@/lib/utils";
 
 type Appt = {
   id: string;

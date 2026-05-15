@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Calendar, DollarSign, Users, ArrowRight, CalendarPlus, TrendingUp, Trophy } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, fmtBrTime, fmtBrShort, startOfBrDay, addDays, BR_TZ } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
@@ -13,9 +13,9 @@ import { PublicLinkBanner } from "./public-link-banner";
 export default async function DashboardPage() {
   const { ctx } = await requireActiveSubscription();
   const now = new Date();
-  const start = new Date(now); start.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(start); tomorrow.setDate(tomorrow.getDate() + 1);
-  const sevenDaysAgo = new Date(start); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+  const start = startOfBrDay(now);
+  const tomorrow = addDays(start, 1);
+  const sevenDaysAgo = addDays(start, -6);
 
   const business = await prisma.business.findUnique({ where: { id: ctx.businessId }, select: { slug: true } });
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
@@ -49,11 +49,11 @@ export default async function DashboardPage() {
     }),
   ]);
 
-  // Receita por dia (últimos 7 dias)
+  // Receita por dia (últimos 7 dias) — comparar pelo dia BRT
   const dailyRevenue = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(sevenDaysAgo); d.setDate(d.getDate() + i);
+    const d = addDays(sevenDaysAgo, i);
     return weeklyAggs
-      .filter((a) => sameDay(a.startsAt, d))
+      .filter((a) => sameBrDay(a.startsAt, d))
       .reduce((sum, a) => sum + a.priceCents, 0);
   });
 
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{greeting} 👋</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Resumo de {now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
+          Resumo de {now.toLocaleDateString("pt-BR", { timeZone: BR_TZ, weekday: "long", day: "2-digit", month: "long" })}
         </p>
       </div>
 
@@ -132,8 +132,8 @@ export default async function DashboardPage() {
             <Sparkline data={dailyRevenue} color="hsl(142 71% 35%)" height={140} />
             <div className="mt-2 grid grid-cols-7 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
               {Array.from({ length: 7 }, (_, i) => {
-                const d = new Date(sevenDaysAgo); d.setDate(d.getDate() + i);
-                return <div key={i}>{d.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "")}</div>;
+                const d = addDays(sevenDaysAgo, i);
+                return <div key={i}>{d.toLocaleDateString("pt-BR", { timeZone: BR_TZ, weekday: "short" }).replace(".", "")}</div>;
               })}
             </div>
           </div>
@@ -189,11 +189,9 @@ export default async function DashboardPage() {
               <div key={a.id} className="flex items-center gap-4 p-4">
                 <div className="flex w-16 shrink-0 flex-col items-center rounded-lg bg-muted py-2">
                   <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    {a.startsAt.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "")}
+                    {fmtBrShort(a.startsAt).replace(".", "")}
                   </div>
-                  <div className="text-base font-bold">
-                    {a.startsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                  </div>
+                  <div className="text-base font-bold">{fmtBrTime(a.startsAt)}</div>
                 </div>
                 <Avatar name={a.customer.name} />
                 <div className="flex-1 min-w-0">
@@ -230,6 +228,7 @@ function KpiCard({ icon: Icon, label, value, sublabel, gradient, iconColor, tren
   );
 }
 
-function sameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+function sameBrDay(a: Date, b: Date) {
+  const f = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: BR_TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+  return f(a) === f(b);
 }

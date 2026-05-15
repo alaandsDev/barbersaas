@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Trash2, CheckCircle2, XCircle, CalendarDays, List, LayoutGrid } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatBRL, cn } from "@/lib/utils";
+import { formatBRL, cn, fmtBrTime, parseBR, startOfBrDay, startOfBrWeek, addDays, brDateString } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -19,13 +19,6 @@ const STATUS: Record<string, { label: string; variant: "info" | "success" | "war
   CANCELED: { label: "Cancelado", variant: "warning" },
   NO_SHOW: { label: "Não compareceu", variant: "destructive" },
 };
-
-function startOfWeek(d: Date) {
-  const out = new Date(d); out.setHours(0, 0, 0, 0);
-  const day = (out.getDay() + 6) % 7;
-  out.setDate(out.getDate() - day);
-  return out;
-}
 
 export default async function AgendaPage({ searchParams }: { searchParams: { date?: string; view?: string; week?: string } }) {
   const { ctx } = await requireActiveSubscription();
@@ -49,9 +42,9 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
   );
 
   if (view === "week") {
-    const weekStart = searchParams.week ? new Date(searchParams.week) : startOfWeek(new Date());
-    if (Number.isNaN(weekStart.getTime())) weekStart.setTime(startOfWeek(new Date()).getTime());
-    const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 7);
+    const weekStart = searchParams.week ? parseBR(searchParams.week) : startOfBrWeek();
+    if (Number.isNaN(weekStart.getTime())) weekStart.setTime(startOfBrWeek().getTime());
+    const weekEnd = addDays(weekStart, 7);
 
     const appointments = await prisma.appointment.findMany({
       where: { businessId: ctx.businessId, startsAt: { gte: weekStart, lt: weekEnd } },
@@ -69,7 +62,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
         <NewAppointmentForm professionals={professionals} services={services} customers={customers} />
 
         <WeekShell
-          weekStartISO={weekStart.toISOString().slice(0, 10)}
+          weekStartISO={brDateString(weekStart)}
           appointments={appointments.map((a) => ({
             id: a.id,
             startsAt: a.startsAt.toISOString(),
@@ -86,10 +79,10 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
   }
 
   // LIST VIEW (existente)
-  const day = searchParams.date ? new Date(searchParams.date) : new Date();
-  day.setHours(0, 0, 0, 0);
-  const next = new Date(day); next.setDate(next.getDate() + 1);
-  const todayISO = day.toISOString().slice(0, 10);
+  const day = searchParams.date ? parseBR(searchParams.date) : startOfBrDay(new Date());
+  if (Number.isNaN(day.getTime())) day.setTime(startOfBrDay().getTime());
+  const next = addDays(day, 1);
+  const todayISO = brDateString(day);
 
   const appointments = await prisma.appointment.findMany({
     where: { businessId: ctx.businessId, startsAt: { gte: day, lt: next } },
@@ -140,7 +133,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
                 return (
                   <TableRow key={a.id}>
                     <TableCell className="font-medium">
-                      {a.startsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}<span className="text-muted-foreground">–{a.endsAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+                      {fmtBrTime(a.startsAt)}<span className="text-muted-foreground">–{fmtBrTime(a.endsAt)}</span>
                     </TableCell>
                     <TableCell>{a.customer.name}</TableCell>
                     <TableCell className="text-muted-foreground">{a.service.name}</TableCell>
