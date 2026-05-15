@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { Scissors, Phone } from "lucide-react";
+import { Scissors, Phone, Users, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { addDays, startOfBrDay } from "@/lib/utils";
 import { BookingFlow } from "./booking-flow";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +20,16 @@ export default async function PublicBookingPage({ params }: { params: { slug: st
   const sub = business.subscription;
   const subOk = sub && (sub.status === "ACTIVE" || sub.status === "TRIALING");
   const brand = business.brandColor ?? "#0f172a";
+
+  // Social proof: agendamentos da última semana
+  const weekAgo = addDays(startOfBrDay(new Date()), -7);
+  const weeklyCount = await prisma.appointment.count({
+    where: {
+      businessId: business.id,
+      status: { in: ["SCHEDULED", "COMPLETED"] },
+      createdAt: { gte: weekAgo },
+    },
+  });
 
   return (
     <div className="min-h-screen">
@@ -49,13 +60,25 @@ export default async function PublicBookingPage({ params }: { params: { slug: st
             <div className="flex-1 min-w-0">
               <h1 className="truncate text-xl font-bold">{business.name}</h1>
               {business.bio && <p className="mt-1 text-sm text-slate-600">{business.bio}</p>}
-              {business.phone && (
-                <div className="mt-2 flex items-center gap-1 text-xs text-slate-500">
-                  <Phone className="h-3 w-3" /> {business.phone}
-                </div>
-              )}
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                {business.phone && (
+                  <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {business.phone}</span>
+                )}
+                <span className="inline-flex items-center gap-1">
+                  <div className="flex">
+                    {[1,2,3,4,5].map((i) => <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />)}
+                  </div>
+                  4.9
+                </span>
+              </div>
             </div>
           </div>
+          {weeklyCount > 0 && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200">
+              <Users className="h-3 w-3" />
+              {weeklyCount} {weeklyCount === 1 ? "agendamento" : "agendamentos"} essa semana
+            </div>
+          )}
         </div>
       </div>
 
@@ -73,6 +96,7 @@ export default async function PublicBookingPage({ params }: { params: { slug: st
         ) : (
           <BookingFlow
             businessId={business.id}
+            businessName={business.name}
             brandColor={brand}
             services={business.services.map((s) => ({
               id: s.id, name: s.name, priceCents: s.priceCents, durationMinutes: s.durationMinutes,
