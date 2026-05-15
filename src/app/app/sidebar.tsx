@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, LayoutDashboard, Users, Scissors, BadgeDollarSign, UserCog, Gift, LogOut, Sparkles, BarChart3, Settings } from "lucide-react";
+import { Calendar, LayoutDashboard, Users, Scissors, BadgeDollarSign, UserCog, Gift, LogOut, Sparkles, BarChart3, Settings, Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/app", label: "Dashboard", icon: LayoutDashboard },
   { href: "/app/agenda", label: "Agenda", icon: Calendar },
+  { href: "/app/bloqueios", label: "Bloqueios", icon: Ban },
   { href: "/app/clientes", label: "Clientes", icon: Users },
   { href: "/app/profissionais", label: "Profissionais", icon: UserCog },
   { href: "/app/servicos", label: "Serviços", icon: Scissors },

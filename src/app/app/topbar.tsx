@@ -8,6 +8,7 @@ import { NotificationBell } from "./notification-bell";
 const TITLES: Record<string, string> = {
   "/app": "Dashboard",
   "/app/agenda": "Agenda",
+  "/app/bloqueios": "Bloqueios",
   "/app/clientes": "Clientes",
   "/app/profissionais": "Profissionais",
   "/app/servicos": "Serviços",

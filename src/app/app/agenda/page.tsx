@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Trash2, CheckCircle2, XCircle, CalendarDays, List, LayoutGrid } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatBRL, cn, fmtBrTime, parseBR, startOfBrDay, startOfBrWeek, addDays, brDateString } from "@/lib/utils";
+import { formatBRL, cn, fmtBrTime, parseBR, startOfBrDay, startOfBrWeek, addDays, brDateString, toBrLocalInput } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { NewAppointmentForm } from "./new-appointment-form";
 import { setAppointmentStatus, deleteAppointment } from "./actions";
 import { WeekShell } from "./week-shell";
+import { EditAppointmentButton } from "./edit-appointment";
 
 const STATUS: Record<string, { label: string; variant: "info" | "success" | "warning" | "destructive" | "default" }> = {
   SCHEDULED: { label: "Agendado", variant: "info" },
@@ -140,10 +141,20 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
                     <TableCell className="text-muted-foreground">{a.professional.name}</TableCell>
                     <TableCell className="text-right font-medium">{formatBRL(a.priceCents)}</TableCell>
                     <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
-                    <TableCell className="w-32">
+                    <TableCell className="w-44">
                       <div className="flex justify-end gap-1">
                         {a.status === "SCHEDULED" && (
                           <>
+                            <EditAppointmentButton
+                              appointment={{
+                                id: a.id,
+                                startsAtLocal: toBrLocalInput(a.startsAt),
+                                serviceId: a.serviceId,
+                                professionalId: a.professionalId,
+                              }}
+                              professionals={professionals.map((x) => ({ id: x.id, name: x.name }))}
+                              services={services.map((x) => ({ id: x.id, name: x.name }))}
+                            />
                             <form action={setAppointmentStatus}>
                               <input type="hidden" name="id" value={a.id} />
                               <input type="hidden" name="status" value="COMPLETED" />

@@ -3,16 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
-import { Calendar, LayoutDashboard, Users, Scissors, BadgeDollarSign, UserCog, Gift, BarChart3, LogOut, Search } from "lucide-react";
+import { Calendar, LayoutDashboard, Users, Scissors, BadgeDollarSign, UserCog, Gift, BarChart3, LogOut, Search, Ban, Settings } from "lucide-react";
 
 const items = [
   { href: "/app", label: "Dashboard", icon: LayoutDashboard, group: "Navegar" },
   { href: "/app/agenda", label: "Agenda", icon: Calendar, group: "Navegar" },
+  { href: "/app/bloqueios", label: "Bloqueios", icon: Ban, group: "Navegar" },
   { href: "/app/clientes", label: "Clientes", icon: Users, group: "Navegar" },
   { href: "/app/profissionais", label: "Profissionais", icon: UserCog, group: "Navegar" },
   { href: "/app/servicos", label: "Serviços", icon: Scissors, group: "Navegar" },
   { href: "/app/financeiro", label: "Financeiro", icon: BarChart3, group: "Navegar" },
   { href: "/app/indicacoes", label: "Indique e ganhe", icon: Gift, group: "Navegar" },
+  { href: "/app/settings", label: "Configurações", icon: Settings, group: "Navegar" },
   { href: "/app/billing", label: "Plano & Cobrança", icon: BadgeDollarSign, group: "Navegar" },
 ];
 

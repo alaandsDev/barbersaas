@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Trash2, Users } from "lucide-react";
 import { requireActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -53,7 +54,9 @@ export default async function ClientesPage() {
             <TableBody>
               {items.map((c) => (
                 <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/app/clientes/${c.id}`} className="hover:underline">{c.name}</Link>
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{c.phone}</TableCell>
                   <TableCell className="text-muted-foreground">{c.email}</TableCell>
                   <TableCell className="text-right font-medium">{c._count.appointments}</TableCell>

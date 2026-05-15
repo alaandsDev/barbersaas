@@ -53,6 +53,17 @@ export async function createAppointment(formData: FormData): Promise<ActionResul
   });
   if (conflict) return { ok: false, error: "Conflito de horário para esse profissional" };
 
+  // Bloqueios (folga, almoço)
+  const blocked = await prisma.timeBlock.findFirst({
+    where: {
+      businessId: ctx.businessId,
+      professionalId: p.professionalId,
+      startsAt: { lt: endsAt },
+      endsAt: { gt: startsAt },
+    },
+  });
+  if (blocked) return { ok: false, error: "Profissional indisponível nesse horário (bloqueio ativo)" };
+
   await prisma.appointment.create({
     data: {
       businessId: ctx.businessId,
@@ -87,6 +98,71 @@ export async function setAppointmentStatus(formData: FormData) {
   });
   revalidatePath("/app/agenda");
   revalidatePath("/app");
+}
+
+const updateSchema = z.object({
+  id: z.string().min(1),
+  professionalId: z.string().min(1),
+  serviceId: z.string().min(1),
+  startsAt: z.string().min(1),
+});
+
+export async function updateAppointment(formData: FormData): Promise<ActionResult> {
+  const ctx = await requireTenant();
+  const parsed = updateSchema.safeParse({
+    id: formData.get("id"),
+    professionalId: formData.get("professionalId"),
+    serviceId: formData.get("serviceId"),
+    startsAt: formData.get("startsAt"),
+  });
+  if (!parsed.success) return { ok: false, error: "Dados inválidos" };
+  const p = parsed.data;
+
+  const [appt, service, professional] = await Promise.all([
+    prisma.appointment.findFirst({ where: { id: p.id, businessId: ctx.businessId } }),
+    prisma.service.findFirst({ where: { id: p.serviceId, businessId: ctx.businessId } }),
+    prisma.professional.findFirst({ where: { id: p.professionalId, businessId: ctx.businessId } }),
+  ]);
+  if (!appt || !service || !professional) return { ok: false, error: "Recurso inválido" };
+
+  const startsAt = parseBR(p.startsAt);
+  if (Number.isNaN(startsAt.getTime())) return { ok: false, error: "Data inválida" };
+  const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000);
+
+  const conflict = await prisma.appointment.findFirst({
+    where: {
+      businessId: ctx.businessId,
+      professionalId: p.professionalId,
+      status: { in: ["SCHEDULED", "COMPLETED"] },
+      id: { not: p.id },
+      startsAt: { lt: endsAt },
+      endsAt: { gt: startsAt },
+    },
+  });
+  if (conflict) return { ok: false, error: "Conflito de horário" };
+
+  const blocked = await prisma.timeBlock.findFirst({
+    where: {
+      businessId: ctx.businessId,
+      professionalId: p.professionalId,
+      startsAt: { lt: endsAt },
+      endsAt: { gt: startsAt },
+    },
+  });
+  if (blocked) return { ok: false, error: "Profissional indisponível (bloqueio)" };
+
+  await prisma.appointment.update({
+    where: { id: p.id },
+    data: {
+      professionalId: p.professionalId,
+      serviceId: p.serviceId,
+      startsAt, endsAt,
+      priceCents: service.priceCents,
+    },
+  });
+  revalidatePath("/app/agenda");
+  revalidatePath("/app");
+  return { ok: true };
 }
 
 export async function deleteAppointment(formData: FormData) {

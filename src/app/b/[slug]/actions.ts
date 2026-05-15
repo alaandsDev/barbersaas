@@ -30,15 +30,27 @@ export async function getAvailableSlots(input: z.infer<typeof slotsSchema>): Pro
   const dayStart = parseBR(p.date); // 00:00 BRT
   const dayEnd = new Date(dayStart.getTime() + 24 * 3600_000);
 
-  const busy = await prisma.appointment.findMany({
-    where: {
-      businessId: p.businessId,
-      professionalId: p.professionalId,
-      status: { in: ["SCHEDULED", "COMPLETED"] },
-      startsAt: { gte: dayStart, lt: dayEnd },
-    },
-    select: { startsAt: true, endsAt: true },
-  });
+  const [busy, blocks] = await Promise.all([
+    prisma.appointment.findMany({
+      where: {
+        businessId: p.businessId,
+        professionalId: p.professionalId,
+        status: { in: ["SCHEDULED", "COMPLETED"] },
+        startsAt: { gte: dayStart, lt: dayEnd },
+      },
+      select: { startsAt: true, endsAt: true },
+    }),
+    prisma.timeBlock.findMany({
+      where: {
+        businessId: p.businessId,
+        professionalId: p.professionalId,
+        startsAt: { lt: dayEnd },
+        endsAt: { gt: dayStart },
+      },
+      select: { startsAt: true, endsAt: true },
+    }),
+  ]);
+  const obstacles = [...busy, ...blocks];
 
   const now = new Date();
   const slots: SlotInfo[] = [];
@@ -50,7 +62,7 @@ export async function getAvailableSlots(input: z.infer<typeof slotsSchema>): Pro
     const slotStart = new Date(t);
     const slotEnd = new Date(t + service.durationMinutes * 60_000);
     const inPast = slotStart.getTime() <= now.getTime();
-    const overlap = busy.some((b) => slotStart < b.endsAt && slotEnd > b.startsAt);
+    const overlap = obstacles.some((b) => slotStart < b.endsAt && slotEnd > b.startsAt);
     slots.push({
       iso: slotStart.toISOString(),
       label: fmtBrTime(slotStart),
@@ -95,16 +107,26 @@ export async function bookPublicAppointment(input: z.infer<typeof bookSchema>): 
   }
   const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000);
 
-  const conflict = await prisma.appointment.findFirst({
-    where: {
-      businessId: p.businessId,
-      professionalId: p.professionalId,
-      status: { in: ["SCHEDULED", "COMPLETED"] },
-      startsAt: { lt: endsAt },
-      endsAt: { gt: startsAt },
-    },
-  });
-  if (conflict) return { ok: false, error: "Horário não está mais disponível" };
+  const [conflict, blocked] = await Promise.all([
+    prisma.appointment.findFirst({
+      where: {
+        businessId: p.businessId,
+        professionalId: p.professionalId,
+        status: { in: ["SCHEDULED", "COMPLETED"] },
+        startsAt: { lt: endsAt },
+        endsAt: { gt: startsAt },
+      },
+    }),
+    prisma.timeBlock.findFirst({
+      where: {
+        businessId: p.businessId,
+        professionalId: p.professionalId,
+        startsAt: { lt: endsAt },
+        endsAt: { gt: startsAt },
+      },
+    }),
+  ]);
+  if (conflict || blocked) return { ok: false, error: "Horário não está mais disponível" };
 
   // upsert customer por telefone (mais comum no salão)
   const phone = p.customerPhone.replace(/\D/g, "");

@@ -65,3 +65,10 @@ export function fmtBrDateTime(d: Date, opts: Intl.DateTimeFormatOptions = {}): s
 export function fmtBrShort(d: Date): string {
   return d.toLocaleDateString("pt-BR", { timeZone: BR_TZ, day: "2-digit", month: "short" });
 }
+
+/** Converte Date pra string "YYYY-MM-DDTHH:mm" representando o horário em BRT (uso em <input type="datetime-local"> defaultValue) */
+export function toBrLocalInput(d: Date): string {
+  const ymd = new Intl.DateTimeFormat("en-CA", { timeZone: BR_TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+  const hm = new Intl.DateTimeFormat("en-GB", { timeZone: BR_TZ, hour: "2-digit", minute: "2-digit", hour12: false }).format(d);
+  return `${ymd}T${hm}`;
+}
